@@ -6,10 +6,11 @@ __author__ = "Konrad Foerstner <konrad@foerstner.org>"
 __copyright__ = "2013 by Konrad Foerstner <konrad@foerstner.org>"
 __license__ = "ISC license"
 __email__ = "konrad@foerstner.org"
-__version__ = "0.2"
+__version__ = "0.3"
 
 import argparse
 from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 parser = argparse.ArgumentParser(description=__description__)
 parser.add_argument("input_genkbank")
@@ -22,8 +23,10 @@ with open(args.output_fasta, "w") as output_fh:
         for feature in record.features:
             if feature.type != args.feature_type:
                 continue
-            output_fh.write(">%s-%s_%s\n%s\n" % (
-                    feature.location.start,
-                    feature.location.end,
-                    {1 : "+", -1 : "-"}[feature.location.strand],
-                    feature.extract(record).seq))
+            feature_seq_record = SeqRecord(feature.extract(record).seq)
+            feature_seq_record.id = "%s-%s_%s" % (
+                feature.location.start,
+                feature.location.end,
+                {1 : "+", -1 : "-"}[feature.location.strand])
+            feature_seq_record.description = ""
+            output_fh.write(feature_seq_record.format("fasta"))
