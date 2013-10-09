@@ -25,5 +25,5 @@ with open(args.output_fasta, "w") as output_fh:
             output_fh.write(">%s-%s_%s\n%s\n" % (
                     feature.location.start,
                     feature.location.end,
-                    feature.location.strand,
+                    {1 : "+", -1 : "-"}[feature.location.strand],
                     feature.extract(record).seq))
