@@ -5,7 +5,7 @@ __author__ = "Konrad Foerstner <konrad@foerstner.org>"
 __copyright__ = "2013 by Konrad Foerstner <konrad@foerstner.org>"
 __license__ = "ISC license"
 __email__ = "konrad@foerstner.org"
-__version__ = "0.1"
+__version__ = "0.2"
 
 import argparse
 import sys
@@ -20,10 +20,10 @@ parser.add_argument("--prefix", default="",
 args = parser.parse_args()
 seen_id = {}
 for record in SeqIO.parse(args.input_fasta, "fasta"):
-    seq_id = args.prefix + record.id
-    if seq_id in seen_id:
-        sys.stderr.write("Error! ID '%s' used before. Stopped.\n" % seq_id)
+    record.id = args.prefix + record.id
+    if record.id in seen_id:
+        sys.stderr.write("Error! ID '%s' used before. Stopped.\n" % record.id)
         sys.exit(1)
-    with open("%s/%s.fa" % (args.output_folder, seq_id), "w") as output_fh:
-        output_fh.write(">%s\n%s\n" % (seq_id, record.seq))
-    seen_id[seq_id] = 1
+    with open("%s/%s.fa" % (args.output_folder, record.id), "w") as output_fh:
+        output_fh.write(record.format("fasta"))
+    seen_id[record.id] = 1
