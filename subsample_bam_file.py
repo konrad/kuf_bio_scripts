@@ -17,13 +17,18 @@ __author__ = "Konrad Foerstner <konrad@foerstner.org>"
 __copyright__ = "2013 by Konrad Foerstner <konrad@foerstner.org>"
 __license__ = "ISC license"
 __email__ = "konrad@foerstner.org"
-__version__ = "0.2"
+__version__ = "0.3"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_bam")
 parser.add_argument("output_bam")
 parser.add_argument("keeping_likelihood", type=float)
+parser.add_argument("--seed", default=None, type=float)
 args = parser.parse_args()
+
+# Set set if given as paramter
+if not args.seed is None:
+    random.seed(args.seed)
 
 prev_query = None
 prev_keep = None
@@ -32,7 +37,7 @@ with pysam.Samfile(args.input_bam, "rb") as input_bam, pysam.Samfile(
     referencelengths=input_bam.lengths, header=input_bam.header,
     text=input_bam.text) as output_bam:
     for alignment in input_bam:
-        # This is for reads that multiple alignments. If there previous
+        # This is for reads with multiple alignments. If there previous
         # alignment comes from the same read treat the current one the
         # same way (keep or discard).
         if  alignment.qname == prev_query:
