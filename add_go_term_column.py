@@ -37,17 +37,19 @@ from bioservices import QuickGO
 def main():
     parser = argparse.ArgumentParser(description=__description__)
     parser.add_argument("input_file")
-    parser.add_argument("gene_id_column", 
+    parser.add_argument("gene_id_column", type=int,
                         help="Column that contain the GeneID entry.")
     parser.add_argument("output_file")
     args = parser.parse_args()
-    go_term_adder = GOTermAdder(args.input_file, args.output_file)
+    go_term_adder = GOTermAdder(args.input_file, args.gene_id_column,
+                                args.output_file)
     go_term_adder.add_go_terms()
     
 class GOTermAdder(object):
         
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file, gene_id_column, output_file):
         self._input_file = input_file
+        self._gene_id_column = gene_id_column
         self._output_file = output_file
         self._tmp_folder = "tmp_data"
         self._uniprot = UniProt(verbose=False)
@@ -56,18 +58,14 @@ class GOTermAdder(object):
             os.mkdir(self._tmp_folder)
             
     def add_go_terms(self):
-        i = 0
         with open(self._output_file, "w") as output_fh:
             for row in csv.reader(open(self._input_file), delimiter="\t"):
-                i += 1
                 if len(row[0]) == 0:
                     self._write_row(row, output_fh)
                     continue
                 else:
                     row = self._add_go_term_column(row)
                     self._write_row(row, output_fh)
-                if i > 10:
-                    sys.exit()
 
     def _write_row(self, row, output_fh):
         output_fh.write("\t".join(row) + "\n")
@@ -141,7 +139,7 @@ class GOTermAdder(object):
         return "%s/%s.json" % (self._tmp_folder, gene_id)
 
     def _gene_id(self, row):
-        return row[9].split("GeneID:")[1].split(";")[0]
+        return row[self._gene_id_column-1].split("GeneID:")[1].split(";")[0]
 
 if __name__ == "__main__": 
     main()
